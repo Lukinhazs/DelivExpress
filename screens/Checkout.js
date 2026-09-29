@@ -24,45 +24,45 @@ export default function Checkout({
   const [pagamento, setPagamento] = useState('');
   const [precisoTroco, setPrecisoTroco] = useState(false);
   const [trocoPara, setTrocoPara] = useState('');
-  const [erro, setErro] = useState('');
+  const [erroCampo, setErroCampo] = useState('');
 
   function finalizarPedido() {
     if (carrinho.length === 0) {
-      setErro('Seu carrinho está vazio.');
+      setErroCampo('carrinho');
       return;
     }
 
     if (nome.trim() === '') {
-      setErro('Informe seu nome.');
+      setErroCampo('nome');
       return;
     }
 
     if (telefone.replace(/\D/g, '').length < 10) {
-      setErro('Telefone inválido.');
+      setErroCampo('telefone');
       return;
     }
 
     if (cep.replace(/\D/g, '').length !== 8) {
-      setErro('CEP deve ter 8 dígitos.');
+      setErroCampo('cep');
       return;
     }
 
     if (endereco.trim() === '') {
-      setErro('Informe o endereço.');
+      setErroCampo('endereco');
       return;
     }
 
     if (!/^[0-9]+$/.test(numero)) {
-      setErro('Número inválido.');
+      setErroCampo('numero');
       return;
     }
 
     if (pagamento === '') {
-      setErro('Escolha a forma de pagamento.');
+      setErroCampo('pagamento');
       return;
     }
 
-    setErro('');
+    setErroCampo('');
 
     navigation.navigate('Confirmacao', {
       dados: {
@@ -79,9 +79,6 @@ export default function Checkout({
       },
     });
   }
-
-  const erroCep =
-    cep.length > 0 && cep.replace(/\D/g, '').length !== 8;
 
   return (
     <View style={styles.container}>
@@ -102,36 +99,59 @@ export default function Checkout({
         <Text style={styles.label}>Nome</Text>
 
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            erroCampo === 'nome' && styles.inputErro,
+          ]}
           value={nome}
           onChangeText={setNome}
         />
 
+        {erroCampo === 'nome' && (
+          <Text style={styles.mensagemErro}>
+            ⚠ Informe seu nome.
+          </Text>
+        )}
+
         <Text style={styles.label}>Telefone</Text>
 
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            erroCampo === 'telefone' && styles.inputErro,
+          ]}
           placeholder="(19) 9____"
           placeholderTextColor="#9CA3AF"
           value={telefone}
-          onChangeText={setTelefone}
+          onChangeText={(texto) =>
+            setTelefone(texto.replace(/\D/g, ''))
+          }
           keyboardType="phone-pad"
+          maxLength={11}
         />
+
+        {erroCampo === 'telefone' && (
+          <Text style={styles.mensagemErro}>
+            ⚠ Telefone inválido.
+          </Text>
+        )}
 
         <Text style={styles.label}>CEP</Text>
 
         <TextInput
           style={[
             styles.input,
-            erroCep && styles.inputErro,
+            erroCampo === 'cep' && styles.inputErro,
           ]}
           value={cep}
-          onChangeText={setCep}
+          onChangeText={(texto) =>
+            setCep(texto.replace(/\D/g, ''))
+          }
           keyboardType="numeric"
           maxLength={8}
         />
 
-        {erroCep && (
+        {erroCampo === 'cep' && (
           <Text style={styles.mensagemErro}>
             ⚠ CEP deve ter 8 dígitos.
           </Text>
@@ -140,19 +160,39 @@ export default function Checkout({
         <Text style={styles.label}>Endereço</Text>
 
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            erroCampo === 'endereco' && styles.inputErro,
+          ]}
           value={endereco}
           onChangeText={setEndereco}
         />
 
+        {erroCampo === 'endereco' && (
+          <Text style={styles.mensagemErro}>
+            ⚠ Informe o endereço.
+          </Text>
+        )}
+
         <Text style={styles.label}>Número</Text>
 
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            erroCampo === 'numero' && styles.inputErro,
+          ]}
           value={numero}
-          onChangeText={setNumero}
+          onChangeText={(texto) =>
+            setNumero(texto.replace(/\D/g, ''))
+          }
           keyboardType="numeric"
         />
+
+        {erroCampo === 'numero' && (
+          <Text style={styles.mensagemErro}>
+            ⚠ Número inválido.
+          </Text>
+        )}
 
         <Text style={styles.label}>
           Complemento
@@ -178,7 +218,13 @@ export default function Checkout({
           Pagamento
         </Text>
 
-        <View style={styles.pickerContainer}>
+        <View
+          style={[
+            styles.pickerContainer,
+            erroCampo === 'pagamento' &&
+              styles.pickerErro,
+          ]}
+        >
           <Picker
             selectedValue={pagamento}
             onValueChange={(valor) => setPagamento(valor)}
@@ -208,6 +254,12 @@ export default function Checkout({
           </Picker>
         </View>
 
+        {erroCampo === 'pagamento' && (
+          <Text style={styles.mensagemErro}>
+            ⚠ Escolha a forma de pagamento.
+          </Text>
+        )}
+
         {pagamento === 'Dinheiro' && (
           <View style={styles.trocoContainer}>
             <View style={styles.linhaSwitch}>
@@ -230,7 +282,9 @@ export default function Checkout({
                 <TextInput
                   style={styles.input}
                   value={trocoPara}
-                  onChangeText={setTrocoPara}
+                  onChangeText={(texto) =>
+                    setTrocoPara(texto.replace(/\D/g, ''))
+                  }
                   keyboardType="numeric"
                 />
               </>
@@ -238,9 +292,9 @@ export default function Checkout({
           </View>
         )}
 
-        {erro !== '' && !erro.includes('CEP') && (
+        {erroCampo === 'carrinho' && (
           <Text style={styles.mensagemErro}>
-            ⚠ {erro}
+            ⚠ Seu carrinho está vazio.
           </Text>
         )}
 
@@ -337,6 +391,11 @@ const styles = StyleSheet.create({
     borderColor: '#D9DDE5',
     borderRadius: 8,
     marginBottom: 10,
+  },
+
+  pickerErro: {
+    borderColor: '#EB5757',
+    backgroundColor: '#FDECEC',
   },
 
   picker: {

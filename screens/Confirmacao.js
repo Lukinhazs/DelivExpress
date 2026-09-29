@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 
 export default function Confirmacao({
@@ -14,6 +16,10 @@ export default function Confirmacao({
 }) {
   const { dados } = route.params;
 
+  const [numeroPedido] = useState(
+    () => Math.floor(1000 + Math.random() * 9000)
+  );
+
   const subtotal = carrinho.reduce(
     (total, item) => total + item.preco * item.quantidade,
     0
@@ -22,9 +28,17 @@ export default function Confirmacao({
   const entrega = 6;
   const total = subtotal + entrega;
 
-  const numeroPedido = Math.floor(
-    1000 + Math.random() * 9000
-  );
+  useEffect(() => {
+    Alert.alert(
+      'Pedido confirmado!',
+      `Seu pedido foi realizado com sucesso!\nPedido #${numeroPedido}`,
+      [
+        {
+          text: 'OK',
+        },
+      ]
+    );
+  }, []);
 
   function novoPedido() {
     setCarrinho([]);
